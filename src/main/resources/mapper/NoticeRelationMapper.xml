@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyq.project_springboot.mapper.NoticeRelationMapper">
+
+    <insert id="insertNoticeRelation">
+        insert into `t_notice_relation`(`notice_id`,`receiver_id`) values (#{noticeId},#{receiverId})
+    </insert>
+</mapper>

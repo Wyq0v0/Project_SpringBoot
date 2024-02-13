@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyq.project_springboot.mapper.CircleConcernMapper">
+
+    <insert id="insertConcern">
+        insert into `t_circle_concern`(`user_id`,`circle_id`) values(#{userId},#{circleId})
+    </insert>
+
+    <delete id="deleteConcern">
+        delete from `t_circle_concern` where `user_id` = #{userId} and `circle_id` = #{circleId}
+    </delete>
+
+    <select id="selectCircleConcern" resultType="com.wyq.project_springboot.entity.CircleConcern">
+        select * from `t_circle_concern` where `user_id` = #{userId} and `circle_id` = #{circleId}
+    </select>
+
+</mapper>

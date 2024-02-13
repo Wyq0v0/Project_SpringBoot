@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyq.project_springboot.mapper.GoodsMapper">
+    <insert id="insertGoods" useGeneratedKeys="true" keyProperty="id">
+        insert into `t_goods`(`user_id`,`name`,`detail`,`category`,`sales_volume`) values(#{userId},#{name},#{detail},#{category},#{salesVolume})
+    </insert>
+
+    <select id="selectGoods" resultMap="goodsResultMap">
+        select * from `t_goods` where id = #{goodsId}
+    </select>
+
+    <select id="selectGoodsListByCriteria" resultMap="goodsResultMap">
+        select * from `t_goods`
+        <where>
+            <if test="name != '' and name != null">
+                and `name` like concat("%",#{name},"%")
+            </if>
+            <if test="userId != 0">
+                and `user_id` = #{userId}
+            </if>
+            <if test="category != 0">
+                and `category` = #{category}
+            </if>
+        </where>
+    </select>
+
+    <resultMap id="goodsResultMap" type="com.wyq.project_springboot.entity.Goods">
+        <id property="id" column="id"></id>
+        <result property="state" column="state" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"></result>
+    </resultMap>
+</mapper>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyq.project_springboot.mapper.CommentThumbsUpMapper">
+    <insert id="insertCommentThumbsUp">
+        insert into `t_comment_thumbs_up`(`user_id`,`comment_id`) values(#{userId},#{commentId})
+    </insert>
+
+    <delete id="deleteCommentThumbsUp">
+        delete from `t_comment_thumbs_up` where `user_id` = #{userId} and `comment_id` = #{commentId}
+    </delete>
+
+    <delete id="deleteCommentThumbsUpByCommentId">
+        delete from `t_comment_thumbs_up` where `comment_id` in( select `id` from `t_comment` where `id` = #{commentId} )
+    </delete>
+
+    <select id="selectCommentThumbsUp" resultType="java.lang.Integer">
+        select count(*) from `t_comment_thumbs_up` where `user_id` = #{userId} and `comment_id` = #{commentId}
+    </select>
+</mapper>

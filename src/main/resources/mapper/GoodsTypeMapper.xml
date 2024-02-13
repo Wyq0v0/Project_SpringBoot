@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyq.project_springboot.mapper.GoodsTypeMapper">
+
+    <insert id="insertGoodsType" useGeneratedKeys="true" keyProperty="id">
+        insert into `t_goods_type`(`goods_id`,`name`,`price`,`storage`) values (#{goodsId},#{name},#{price},#{storage})
+    </insert>
+
+    <select id="selectGoodsTypeList" resultMap="goodsTypeResultMap">
+        select * from `t_goods_type` where `goods_id` = #{goodsId}
+    </select>
+
+    <select id="selectGoodsType" resultMap="goodsTypeResultMap">
+        select * from `t_goods_type` where `id` = #{goodsTypeId}
+    </select>
+
+    <resultMap id="goodsTypeResultMap" type="com.wyq.project_springboot.entity.GoodsType">
+        <id property="id" column="id"></id>
+        <association property="image" select="com.wyq.project_springboot.mapper.GoodsTypeImageMapper.selectGoodsTypeImage" column="id"></association>
+    </resultMap>
+</mapper>

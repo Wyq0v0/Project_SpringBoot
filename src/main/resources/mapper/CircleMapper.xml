@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyq.project_springboot.mapper.CircleMapper">
+    <insert id="insertCircle">
+        insert into `t_circle`(`name`,`motto`,`detail`,`rule`,`profile_picture_path`,`creator_id`) values(#{name},#{motto},#{detail},#{rule},#{profilePicturePath},#{creatorId})
+    </insert>
+
+    <update id="updateCircleState">
+        update `t_circle` set `state` = #{state.value} where `id` = #{circleId}
+    </update>
+
+    <select id="selectCircleByName" resultMap="circleResultMap">
+        select * from `t_circle` where `name` like concat("%",#{name},"%")
+    </select>
+
+    <select id="selectCircle" resultMap="circleResultMap">
+        select * from `t_circle` where `id` = #{circleId}
+    </select>
+
+    <select id="selectAllCircle" resultMap="circleResultMap">
+        select * from `t_circle`
+    </select>
+
+    <select id="selectCircleListByCriteria" resultMap="circleResultMap">
+        select * from `t_circle`
+        <where>
+            <choose>
+                <when test="id != 0">
+                    `id` = #{id}
+                </when>
+                <when test="creatorId != 0">
+                    `creator_id` = #{creatorId}
+                </when>
+                <when test="name != '' and name != null">
+                    `name` like concat("%",#{name},"%")
+                </when>
+                <when test="motto != '' and motto != null">
+                    `motto` like concat("%",#{motto},"%")
+                </when>
+                <when test="detail != '' and detail != null">
+                    `detail` like concat("%",#{detail},"%")
+                </when>
+                <when test="rule != '' and rule != null">
+                    `rule` like concat("%",#{rule},"%")
+                </when>
+            </choose>
+        </where>
+    </select>
+
+    <select id="selectUnauditedCircle" resultMap="circleResultMap">
+        select * from `t_circle` where `state` = 0
+    </select>
+
+    <resultMap id="circleResultMap" type="com.wyq.project_springboot.entity.Circle">
+        <id property="id" column="id"></id>
+        <result property="state" column="state" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"></result>
+    </resultMap>
+</mapper>

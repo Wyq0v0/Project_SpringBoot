@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyq.project_springboot.mapper.UserMapper">
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
+        insert into `t_user`(`account_name`,`phone_number`,`password`) values (#{accountName},#{phoneNumber},#{password})
+    </insert>
+
+    <update id="updateProfilePicture">
+        update `t_user` set `profile_picture_path` = #{fileRelativePath} where `id` = #{userId}
+    </update>
+
+    <update id="updateUser">
+        update `t_user` set `account_name` = #{accountName} , `motto` = #{motto}
+                        <if test="phoneNumber != '' and phoneNumber != null">
+                            , `phone_number` = #{phoneNumber}
+                        </if>
+                        where `id` = #{id}
+    </update>
+
+    <update id="updatePassword">
+        update `t_user` set `password` = #{password} where `id` = #{userId}
+    </update>
+
+    <update id="updateUserWithPassword">
+        update `t_user` set `account_name` = #{accountName} , `motto` = #{motto} , `phone_number` = #{phoneNumber} , `password` = #{password} where `id` = #{id}
+    </update>
+
+    <update id="updateExperience">
+        update `t_user` set `account_exp` = `account_exp` + #{value} where `id` = #{userId}
+    </update>
+
+    <select id="selectUserById" resultType="com.wyq.project_springboot.entity.User">
+        select * from `t_user` where `id` = #{id}
+    </select>
+
+    <select id="selectUserByPhoneNumber" resultType="com.wyq.project_springboot.entity.User">
+        select * from `t_user` where `phone_number` = #{phoneNumber}
+    </select>
+
+    <select id="selectUserListByAccountName" resultType="com.wyq.project_springboot.entity.User">
+        select * from `t_user` where `account_name` like concat("%",#{accountName},"%")
+    </select>
+
+
+
+</mapper>

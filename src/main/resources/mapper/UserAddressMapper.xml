@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyq.project_springboot.mapper.UserAddressMapper">
+
+    <insert id="insertAddress" useGeneratedKeys="true" keyProperty="id">
+        insert into `t_user_address`(`user_id`,`name`,`phone_number`,`address`) values (#{userId},#{name},#{phoneNumber},#{address})
+    </insert>
+
+    <select id="selectAddressList" resultType="com.wyq.project_springboot.entity.Address">
+        select * from `t_user_address` where `id` in
+        <foreach collection="addressIdList" item="addressId" separator="," open="(" close=")">
+            #{addressId}
+        </foreach>
+        order by field(id,
+        <foreach collection="addressIdList" item="addressId" separator=",">
+            #{addressId}
+        </foreach>
+        )
+    </select>
+
+    <select id="selectAddress" resultType="com.wyq.project_springboot.entity.Address">
+        select * from `t_user_address` where `id` = #{addressId}
+    </select>
+</mapper>

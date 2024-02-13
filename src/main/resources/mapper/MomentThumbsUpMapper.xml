@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyq.project_springboot.mapper.MomentThumbsUpMapper">
+
+    <insert id="insertMomentThumbsUp">
+        insert into `t_moment_thumbs_up`(`user_id`,`moment_id`) values(#{userId},#{momentId})
+    </insert>
+
+    <delete id="deleteMomentThumbsUp">
+        delete from `t_moment_thumbs_up` where `user_id` = #{userId} and `moment_id` = #{momentId}
+    </delete>
+
+    <select id="selectMomentThumbsUp" resultType="java.lang.Integer">
+        select count(*) from `t_moment_thumbs_up` where `user_id` = #{userId} and `moment_id` = #{momentId}
+    </select>
+
+</mapper>

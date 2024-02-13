@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyq.project_springboot.mapper.ChatMapper">
+    <insert id="insertChat" parameterType="com.wyq.project_springboot.entity.Chat">
+        insert into `t_chat` values(null,#{senderId},#{receiverId},#{content},#{recordTime},#{isRead,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler})
+    </insert>
+
+    <select id="selectLastChat" resultMap="chatResultMap">
+        select * from `t_chat` where `sender_id` = #{senderId} or `sender_id` = #{receiverId} or `receiver_id` = #{senderId} or `receiver_id` = #{receiverId} order by `record_time` desc limit 1
+    </select>
+
+    <select id="selectChatList" resultMap="chatResultMap">
+        select * from `t_chat` where ((`sender_id` = #{senderId} and `receiver_id` = #{receiverId}) or (`sender_id` = #{receiverId} and `receiver_id` = #{senderId})) and `record_time` <![CDATA[ <= ]]> #{lastMark} order by `record_time` desc limit #{offset},#{pageSize}
+    </select>
+
+    <resultMap id="chatResultMap" type="com.wyq.project_springboot.entity.Chat">
+        <result property="isRead" column="is_read" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"></result>
+    </resultMap>
+</mapper>

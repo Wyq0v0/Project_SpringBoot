@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.wyq.project_springboot.mapper.UserInfoMapper">
+    <insert id="insertUserInfo">
+        insert into `t_user_info`(`user_id`,`real_name`,`gender`,`birthday`,`location`)
+        values(#{userId},#{realName},#{gender.value},#{birthday},#{location.value})
+    </insert>
+
+    <update id="updateUserInfo">
+        update `t_user_info` set `real_name` = #{realName},`gender` = #{gender},
+            `birthday` = #{birthday},`location` = #{location}
+        where `user_id` = #{userId}
+    </update>
+
+
+    <select id="selectUserInfo" resultMap="userInfoResultMap">
+        select * from `t_user_info` where `user_id` = #{userId}
+    </select>
+
+    <resultMap id="userInfoResultMap" type="com.wyq.project_springboot.entity.UserInfo">
+        <id property="id" column="id"></id>
+        <result property="gender" column="gender" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"></result>
+        <result property="location" column="location" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"></result>
+    </resultMap>
+</mapper>

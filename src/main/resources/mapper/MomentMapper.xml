@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyq.project_springboot.mapper.MomentMapper">
+    <insert id="insertMoment" useGeneratedKeys="true" keyProperty="id">
+        insert into `t_moment`(`user_id`,`title`,`content`,`forward_moment_id`,`circle_id`) values (#{userId},#{title},#{content},#{forwardMomentId},#{circleId})
+    </insert>
+
+    <delete id="deleteMoment">
+        delete from `t_moment` where `user_id` = #{userId} and `id` = #{momentId}
+    </delete>
+
+    <update id="addMomentThumbsUpCount">
+        update `t_moment` set `thumbs_up_count` = `thumbs_up_count` + 1 where `id` = #{momentId}
+    </update>
+
+    <update id="subMomentThumbsUpCount">
+        update `t_moment` set `thumbs_up_count` = `thumbs_up_count` - 1 where `id` = #{momentId}
+    </update>
+
+    <update id="addMomentCommentCount">
+        update `t_moment` set `comment_count` = `comment_count` + 1 where `id` = #{momentId}
+    </update>
+
+    <update id="subMomentCommentCount">
+        update `t_moment` set `comment_count` = `comment_count` - 1 where `id` = #{momentId}
+    </update>
+
+    <update id="updateMoment">
+        update `t_moment` set `title` = #{title} , `content` = #{content} where `id` = #{id}
+    </update>
+
+    <!--通过分布查询，先查询出moment，然后查询每个moment中的图片-->
+    <select id="selectUserMomentList" resultMap="momentAndImageStep">
+        select * from `t_moment` where `user_id` = #{userId}
+    </select>
+
+    <!--通过分布查询，先查询出moment，然后查询moment中的图片-->
+    <select id="selectMoment" resultMap="momentAndImageStep">
+        select * from `t_moment` where `id` = #{momentId}
+    </select>
+
+    <!--通过分布查询，先查询出moment，然后查询每个moment中的图片-->
+    <select id="selectConcernUserMomentList" resultMap="momentAndImageStep">
+        select * from `t_moment` where `user_id` in( select `concern_id` from `t_concern` where `user_id` = #{userId} )
+    </select>
+
+    <!--通过分布查询，先查询出moment，然后查询每个moment中的图片-->
+    <select id="selectAllMoment" resultMap="momentAndImageStep">
+        select * from `t_moment`
+    </select>
+
+    <select id="selectMomentListByCriteria" resultMap="momentAndImageStep">
+        select * from `t_moment`
+        <where>
+            <choose>
+                <when test="title != '' and title != null and content != '' and content != null">
+                    `title` like concat("%",#{title},"%") or `content` like concat("%",#{content},"%")
+                </when>
+                <when test="title != '' and title != null">
+                    `title` like concat("%",#{title},"%")
+                </when>
+                <when test="content != '' and content != null">
+                    `content` like concat("%",#{content},"%")
+                </when>
+                <when test="userId != 0">
+                    `user_id` = #{userId}
+                </when>
+            </choose>
+        </where>
+    </select>
+
+    <select id="selectMomentListByAccountName" resultMap="momentAndImageStep">
+        select * from `t_moment` where `user_id` in(select `id` from `t_user` where `account_name` like concat("%",#{accountName},"%"))
+    </select>
+
+    <select id="selectCircleMomentList" resultMap="momentAndImageStep">
+        select * from `t_moment` where `circle_id` = #{circleId}
+    </select>
+
+    <select id="selectMomentByIdList" resultMap="momentAndImageStep">
+        select * from `t_moment` where `id` in
+        <foreach collection="momentIdList" item="momentId" separator="," open="(" close=")">
+            #{momentId}
+        </foreach>
+        order by field(id,
+        <foreach collection="momentIdList" item="momentId" separator=",">
+            #{momentId}
+        </foreach>
+        )
+    </select>
+
+    <resultMap id="momentAndImageStep" type="com.wyq.project_springboot.entity.Moment">
+        <id property="id" column="id"></id>
+        <collection property="images" fetchType="eager" select="com.wyq.project_springboot.mapper.MomentImageMapper.selectImageList" column="id"></collection>
+    </resultMap>
+
+</mapper>

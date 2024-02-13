@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyq.project_springboot.mapper.CommentMapper">
+
+    <select id="selectComment" resultType="com.wyq.project_springboot.entity.Comment">
+        select * from `t_comment` where `id` = #{commentId}
+    </select>
+
+    <select id="selectCommentList" resultMap="commentAndImageStep">
+        select * from `t_comment` where `moment_id` = #{momentId}
+    </select>
+
+    <insert id="insertComment" useGeneratedKeys="true" keyProperty="id">
+        insert into `t_comment`(`user_id`,`moment_id`,`content`) values(#{userId},#{momentId},#{content})
+    </insert>
+
+    <delete id="deleteComment">
+        delete from `t_comment` where `user_id` = #{userId} and `id` = #{commentId}
+    </delete>
+
+    <delete id="deleteCommentByMomentId">
+        delete from `t_comment` where `moment_id` = #{momentId}
+    </delete>
+
+    <update id="addCommentThumbsUpCount">
+        update `t_comment` set `thumbs_up_count` = `thumbs_up_count` + 1 where `id` = #{commentId}
+    </update>
+
+    <update id="subCommentThumbsUpCount">
+        update `t_comment` set `thumbs_up_count` = `thumbs_up_count` - 1 where `id` = #{commentId}
+    </update>
+
+    <resultMap id="commentAndImageStep" type="com.wyq.project_springboot.entity.Comment">
+        <id property="id" column="id"></id>
+        <collection property="images" fetchType="eager" select="com.wyq.project_springboot.mapper.CommentImageMapper.selectImageList" column="id"></collection>
+    </resultMap>
+
+</mapper>

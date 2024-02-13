@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wyq.project_springboot.mapper.GoodsPreviewImageMapper">
+
+    <insert id="insertImage">
+        insert into `t_goods_preview_image`(`depend_id`,`image_path`,`image_size`) values(#{dependId},#{imagePath},#{imageSize})
+    </insert>
+
+    <delete id="deleteImage">
+        delete from `t_goods_preview_image` where `depend_id` = #{goodsId}
+    </delete>
+
+    <select id="selectImageList" resultType="com.wyq.project_springboot.entity.Image">
+        select * from `t_goods_preview_image` where `depend_id` = #{goodsId}
+    </select>
+
+</mapper>
