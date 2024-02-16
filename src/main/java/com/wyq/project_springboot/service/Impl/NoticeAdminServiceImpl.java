@@ -10,9 +10,11 @@ import com.wyq.project_springboot.mapper.NoticeRelationMapper;
 import com.wyq.project_springboot.mapper.UserMapper;
 import com.wyq.project_springboot.service.NoticeAdminService;
 import com.wyq.project_springboot.utils.ThreadLocalUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -20,6 +22,8 @@ import static com.wyq.project_springboot.utils.RedisConstants.NOTICE_ALL_KEY;
 import static com.wyq.project_springboot.utils.RedisConstants.NOTICE_PERSON_KEY;
 
 @Service
+@Transactional
+@Slf4j
 public class NoticeAdminServiceImpl implements NoticeAdminService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;

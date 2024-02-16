@@ -12,6 +12,7 @@ import com.wyq.project_springboot.mapper.UserMapper;
 import com.wyq.project_springboot.service.CircleService;
 import com.wyq.project_springboot.utils.ExpCalculateUtil;
 import com.wyq.project_springboot.utils.ThreadLocalUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ import static com.wyq.project_springboot.utils.ImageUploadConstant.IMAGE_UPLOAD_
 
 @Service
 @Transactional
+@Slf4j
 public class CircleServiceImpl implements CircleService {
     @Autowired
     private UserMapper userMapper;

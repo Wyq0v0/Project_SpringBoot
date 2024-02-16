@@ -12,6 +12,7 @@ import com.wyq.project_springboot.mapper.UserMapper;
 import com.wyq.project_springboot.utils.ExpCalculateUtil;
 import com.wyq.project_springboot.service.UserService;
 import com.wyq.project_springboot.utils.ThreadLocalUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ import static com.wyq.project_springboot.utils.RedisConstants.*;
 
 @Service
 @Transactional
+@Slf4j
 public class UserServiceImpl implements UserService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;

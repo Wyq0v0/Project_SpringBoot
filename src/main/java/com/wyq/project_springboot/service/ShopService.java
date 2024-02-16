@@ -40,5 +40,7 @@ public interface ShopService {
 
     void payNotify(HttpServletRequest httpServletRequest) throws AlipayApiException;
 
-    Result getSalesGoodsOrderList(Integer goodsId,String selectItem, String content, String sortBy, String sortOrder, int pageNum, int pageSize);
+    Result getSalesGoodsOrderList(int goodsId,String selectItem, String content, String sortBy, String sortOrder, int pageNum, int pageSize);
+
+    Result deleteGoodsType(int goodsTypeId);
 }

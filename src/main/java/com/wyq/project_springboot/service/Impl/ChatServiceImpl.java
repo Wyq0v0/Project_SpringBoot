@@ -7,6 +7,7 @@ import com.wyq.project_springboot.entity.*;
 import com.wyq.project_springboot.entity.enumClass.ChatRead;
 import com.wyq.project_springboot.mapper.*;
 import com.wyq.project_springboot.service.ChatService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@Slf4j
 public class ChatServiceImpl implements ChatService {
     @Autowired
     private ChatRelationMapper chatRelationMapper;

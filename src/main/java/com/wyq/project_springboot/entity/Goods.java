@@ -1,5 +1,6 @@
 package com.wyq.project_springboot.entity;
 
+import com.wyq.project_springboot.entity.enumClass.DeleteState;
 import com.wyq.project_springboot.entity.enumClass.GoodsState;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,4 +22,5 @@ public class Goods {
     private List<GoodsType> goodsTypes;
     private List<Image> previewImage;
     private List<Image> detailImage;
+    private DeleteState isDelete = DeleteState.UNDELETED;
 }

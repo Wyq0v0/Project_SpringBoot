@@ -7,6 +7,7 @@ import com.wyq.project_springboot.entity.enumClass.GoodsOrderState;
 import com.wyq.project_springboot.service.ShopService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -80,4 +81,8 @@ public class ShopController {
         return shopService.getSalesGoodsOrderList(goodsId,selectItem,content,sortBy, sortOrder, pageNum, pageSize);
     }
 
+    @DeleteMapping("/deleteGoodsType")
+    public Result deleteGoodsType(Integer goodsTypeId){
+        return shopService.deleteGoodsType(goodsTypeId);
+    }
 }

@@ -12,6 +12,7 @@ import com.wyq.project_springboot.mapper.UserMapper;
 import com.wyq.project_springboot.utils.ImageUploadConstant;
 import com.wyq.project_springboot.service.UserAdminService;
 import com.wyq.project_springboot.utils.MD5Util;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import static com.wyq.project_springboot.utils.ImageUploadConstant.USER_PROFILE_
 
 @Service
 @Transactional
+@Slf4j
 public class UserAdminServiceImpl implements UserAdminService {
     @Autowired
     private UserMapper userMapper;
@@ -38,7 +40,7 @@ public class UserAdminServiceImpl implements UserAdminService {
     public Result getUserList(String selectItem, String content, String sortBy, String sortOrder, int pageNum, int pageSize) {
         ListDTO listDTO = new ListDTO();
 
-        List<UserDTO> userDTOList = new ArrayList<>();
+        List<UserDTO> userDTOList = new ArrayList<>(pageSize);
         //该对象作为搜索条件
         User selectUser = new User();
 

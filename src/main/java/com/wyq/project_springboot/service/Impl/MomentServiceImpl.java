@@ -11,6 +11,7 @@ import com.wyq.project_springboot.entity.*;
 import com.wyq.project_springboot.mapper.*;
 import com.wyq.project_springboot.service.MomentService;
 import com.wyq.project_springboot.utils.ThreadLocalUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -29,6 +30,7 @@ import static com.wyq.project_springboot.utils.RedisConstants.*;
 
 @Service
 @Transactional
+@Slf4j
 public class MomentServiceImpl implements MomentService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -98,12 +100,12 @@ public class MomentServiceImpl implements MomentService {
         }
 
         //向Redis中动态点赞榜和评论榜插入该动态
-        stringRedisTemplate.opsForZSet().add(MOMENT_THUMBS_UP_RANK_KEY, Integer.toString(moment.getId()),0);
-        stringRedisTemplate.opsForZSet().add(MOMENT_COMMENT_RANK_KEY, Integer.toString(moment.getId()),0);
+        stringRedisTemplate.opsForZSet().add(MOMENT_THUMBS_UP_RANK_KEY, Integer.toString(moment.getId()), 0);
+        stringRedisTemplate.opsForZSet().add(MOMENT_COMMENT_RANK_KEY, Integer.toString(moment.getId()), 0);
 
         //判断用户今日发布动态增加经验次数是否已达上限
         Double score = stringRedisTemplate.opsForZSet().score(EXP_TASK_KEY + userId, SEND_MOMENT_TASK_KEY);
-        if(score == null || score < SEND_MOMENT_TASK_TOTAL){
+        if (score == null || score < SEND_MOMENT_TASK_TOTAL) {
             //为用户增加经验
             userMapper.updateExperience(userId, SEND_MOMENT_EXP);
             //为Redis中用户任务完成情况该操作次数+1
@@ -112,12 +114,13 @@ public class MomentServiceImpl implements MomentService {
 
         //向该用户的粉丝推送该动态
         List<Concern> concerns = concernMapper.selectBeConcernedList(userId);
-        for(Concern concern : concerns){
+        for (Concern concern : concerns) {
             int fansId = concern.getUserId();
             String key = CONCERN_KEY + fansId;
-            stringRedisTemplate.opsForZSet().add(key,Integer.toString(moment.getId()),System.currentTimeMillis());
+            stringRedisTemplate.opsForZSet().add(key, Integer.toString(moment.getId()), System.currentTimeMillis());
         }
 
+        log.info("用户(ID:{})添加一条新动态(ID:{})", userId, moment.getId());
         return Result.success();
     }
 
@@ -142,6 +145,8 @@ public class MomentServiceImpl implements MomentService {
         stringRedisTemplate.delete(MOMENT_COMMENT_KEY + momentId);
         //删除评论排行榜中该动态
         stringRedisTemplate.opsForZSet().remove(MOMENT_COMMENT_RANK_KEY, key);
+
+        log.info("用户(ID:{})删除一条动态(ID:{})", userId, momentId);
         return Result.success();
     }
 
@@ -174,7 +179,7 @@ public class MomentServiceImpl implements MomentService {
     }
 
     @Override
-    public Result getPopularMomentList(String lastMark,int offset,int pageSize) {
+    public Result getPopularMomentList(String lastMark, int offset, int pageSize) {
         ListDTO listDTO = new ListDTO();
 
         //获取用户ID
@@ -183,7 +188,7 @@ public class MomentServiceImpl implements MomentService {
 
         //从Redis中获取点赞榜中数据
         Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet().reverseRangeByScoreWithScores(MOMENT_COMMENT_RANK_KEY, 0, Double.parseDouble(lastMark), offset, pageSize);
-        if(typedTuples == null || typedTuples.isEmpty()){
+        if (typedTuples == null || typedTuples.isEmpty()) {
             return Result.success();
         }
 
@@ -192,16 +197,16 @@ public class MomentServiceImpl implements MomentService {
 
         int lastMarkCount = 0;
         int offsetCount = 1;
-        for(ZSetOperations.TypedTuple<String> typedTuple : typedTuples){
+        for (ZSetOperations.TypedTuple<String> typedTuple : typedTuples) {
             //向id集合中添加该数据
             momentIdList.add(Integer.parseInt(typedTuple.getValue()));
 
             //计算偏移量
             int score = typedTuple.getScore().intValue();
 
-            if(score == lastMarkCount){
+            if (score == lastMarkCount) {
                 offsetCount++;
-            }else {
+            } else {
                 //得到最后一个元素标识
                 lastMarkCount = score;
                 offsetCount = 1;
@@ -269,7 +274,7 @@ public class MomentServiceImpl implements MomentService {
         return Result.success(momentDTO);
     }
 
-    public Result getRecommendMomentList(String lastMark,int offset,int pageSize) {
+    public Result getRecommendMomentList(String lastMark, int offset, int pageSize) {
         ListDTO listDTO = new ListDTO();
 
         //获取用户ID
@@ -278,7 +283,7 @@ public class MomentServiceImpl implements MomentService {
 
         //从Redis中获取点赞榜中数据
         Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet().reverseRangeByScoreWithScores(MOMENT_THUMBS_UP_RANK_KEY, 0, Double.parseDouble(lastMark), offset, pageSize);
-        if(typedTuples == null || typedTuples.isEmpty()){
+        if (typedTuples == null || typedTuples.isEmpty()) {
             return Result.success();
         }
 
@@ -287,16 +292,16 @@ public class MomentServiceImpl implements MomentService {
 
         int lastMarkCount = 0;
         int offsetCount = 1;
-        for(ZSetOperations.TypedTuple<String> typedTuple : typedTuples){
+        for (ZSetOperations.TypedTuple<String> typedTuple : typedTuples) {
             //向id集合中添加该数据
             momentIdList.add(Integer.parseInt(typedTuple.getValue()));
 
             //计算偏移量
             int score = typedTuple.getScore().intValue();
 
-            if(score == lastMarkCount){
+            if (score == lastMarkCount) {
                 offsetCount++;
-            }else {
+            } else {
                 //得到最后一个元素标识
                 lastMarkCount = score;
                 offsetCount = 1;
@@ -321,7 +326,7 @@ public class MomentServiceImpl implements MomentService {
         return Result.success(listDTO);
     }
 
-    public Result getConcernUserMomentList(String lastMark,int offset,int pageSize) {
+    public Result getConcernUserMomentList(String lastMark, int offset, int pageSize) {
         ListDTO listDTO = new ListDTO();
 
         //获取用户ID
@@ -332,7 +337,7 @@ public class MomentServiceImpl implements MomentService {
 
         //从Redis中获取关注收件箱中数据
         Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet().reverseRangeByScoreWithScores(key, 0, Double.parseDouble(lastMark), offset, pageSize);
-        if(typedTuples == null || typedTuples.isEmpty()){
+        if (typedTuples == null || typedTuples.isEmpty()) {
             return Result.success();
         }
 
@@ -341,16 +346,16 @@ public class MomentServiceImpl implements MomentService {
 
         long lastMarkCount = 0;
         int offsetCount = 1;
-        for(ZSetOperations.TypedTuple<String> typedTuple : typedTuples){
+        for (ZSetOperations.TypedTuple<String> typedTuple : typedTuples) {
             //向id集合中添加该数据
             momentIdList.add(Integer.parseInt(typedTuple.getValue()));
 
             //计算偏移量
             long score = typedTuple.getScore().intValue();
 
-            if(score == lastMarkCount){
+            if (score == lastMarkCount) {
                 offsetCount++;
-            }else {
+            } else {
                 //得到最后一个元素标识
                 lastMarkCount = score;
                 offsetCount = 1;
@@ -381,8 +386,11 @@ public class MomentServiceImpl implements MomentService {
         Map<String, Object> userMap = ThreadLocalUtil.get();
         int userId = (Integer) userMap.get("id");
 
-        // TODO 判断动态是否存在
-
+        // 判断动态是否存在
+        Double scoreInThumbsUpRank = stringRedisTemplate.opsForZSet().score(MOMENT_THUMBS_UP_RANK_KEY, momentId);
+        if (scoreInThumbsUpRank == null) {
+            return Result.error("该动态不存在");
+        }
 
         String key = MOMENT_THUMBS_UP_KEY + momentId;
         //查询是否已经点赞
@@ -397,6 +405,8 @@ public class MomentServiceImpl implements MomentService {
                 //为点赞榜中该动态的分数+1
                 stringRedisTemplate.opsForZSet().incrementScore(MOMENT_THUMBS_UP_RANK_KEY, Integer.toString(momentId), 1);
             }
+
+            log.info("用户(ID:{})为动态(ID:{})点赞", userId, momentId);
             return Result.success();
         }
         return Result.error("已点赞过该动态");
@@ -408,9 +418,11 @@ public class MomentServiceImpl implements MomentService {
         Map<String, Object> userMap = ThreadLocalUtil.get();
         int userId = (Integer) userMap.get("id");
 
-
-        // TODO 判断动态是否存在
-
+        //判断动态是否存在
+        Double scoreInThumbsUpRank = stringRedisTemplate.opsForZSet().score(MOMENT_THUMBS_UP_RANK_KEY, momentId);
+        if (scoreInThumbsUpRank == null) {
+            return Result.error("该动态不存在");
+        }
 
         String key = MOMENT_THUMBS_UP_KEY + momentId;
         //查询是否已经点赞
@@ -425,6 +437,7 @@ public class MomentServiceImpl implements MomentService {
                 //为点赞榜中该动态的分数-1
                 stringRedisTemplate.opsForZSet().incrementScore(MOMENT_THUMBS_UP_RANK_KEY, Integer.toString(momentId), -1);
             }
+            log.info("用户(ID:{})取消为动态(ID:{})的点赞", userId, momentId);
             return Result.success();
         }
         return Result.error("没有点赞过该动态");
@@ -438,7 +451,12 @@ public class MomentServiceImpl implements MomentService {
         Map<String, Object> userMap = ThreadLocalUtil.get();
         int userId = (Integer) userMap.get("id");
 
-        // TODO 判断动态是否存在
+        //判断动态是否存在
+        //判断动态是否存在
+        Double scoreInThumbsUpRank = stringRedisTemplate.opsForZSet().score(MOMENT_THUMBS_UP_RANK_KEY, momentId);
+        if (scoreInThumbsUpRank == null) {
+            return Result.error("该动态不存在");
+        }
 
         String key = MOMENT_THUMBS_UP_KEY + momentId;
         //查询是否已经点赞
@@ -495,13 +513,14 @@ public class MomentServiceImpl implements MomentService {
 
         //判断用户今日发送评论增加经验次数是否已达上限
         Double score = stringRedisTemplate.opsForZSet().score(EXP_TASK_KEY + userId, SEND_COMMENT_TASK_KEY);
-        if(score == null || score < SEND_COMMENT_TASK_TOTAL){
+        if (score == null || score < SEND_COMMENT_TASK_TOTAL) {
             //为用户增加经验
             userMapper.updateExperience(userId, SEND_COMMENT_EXP);
             //为Redis中用户任务完成情况该操作次数+1
             stringRedisTemplate.opsForZSet().incrementScore(EXP_TASK_KEY + userId, SEND_COMMENT_TASK_KEY, 1);
         }
 
+        log.info("用户(ID:{})为动态(ID:{})添加评论(ID:{})", userId, comment.getMomentId(),comment.getId());
         return Result.success();
     }
 
@@ -520,6 +539,7 @@ public class MomentServiceImpl implements MomentService {
         //删除redis中moment的评论集中的该评论
         stringRedisTemplate.opsForZSet().remove(MOMENT_COMMENT_KEY + comment.getMomentId(), Integer.toString(comment.getId()));
 
+        log.info("用户(ID:{})删除评论(ID:{})", userId, comment.getId());
         return Result.success();
     }
 
@@ -573,8 +593,6 @@ public class MomentServiceImpl implements MomentService {
         Map<String, Object> userMap = ThreadLocalUtil.get();
         int userId = (Integer) userMap.get("id");
 
-        // TODO 判断评论是否存在
-
         String key = COMMENT_THUMBS_UP_KEY + commentId;
         //查询是否已经点赞
         Double score = stringRedisTemplate.opsForZSet().score(key, Integer.toString(userId));
@@ -586,6 +604,8 @@ public class MomentServiceImpl implements MomentService {
                 //为redis中评论的点赞集添加用户id
                 stringRedisTemplate.opsForZSet().add(key, Integer.toString(userId), System.currentTimeMillis());
             }
+
+            log.info("用户(ID:{})为评论(ID:{})点赞", userId, commentId);
             return Result.success();
         }
         return Result.error("已点赞过该评论");
@@ -596,8 +616,6 @@ public class MomentServiceImpl implements MomentService {
         //获取用户ID
         Map<String, Object> userMap = ThreadLocalUtil.get();
         int userId = (Integer) userMap.get("id");
-
-        // TODO 判断动态是否存在
 
         String key = COMMENT_THUMBS_UP_KEY + commentId;
         //查询是否已经点赞
@@ -610,6 +628,8 @@ public class MomentServiceImpl implements MomentService {
                 //为redis中评论的点赞集添加用户ID
                 stringRedisTemplate.opsForZSet().remove(key, Integer.toString(userId));
             }
+
+            log.info("用户(ID:{})取消为评论(ID:{})点赞", userId, commentId);
             return Result.success();
         }
         return Result.error("没有点赞过该评论");
@@ -620,8 +640,6 @@ public class MomentServiceImpl implements MomentService {
         //获取用户ID
         Map<String, Object> userMap = ThreadLocalUtil.get();
         int userId = (Integer) userMap.get("id");
-
-        // TODO 判断评论是否存在
 
         String key = COMMENT_THUMBS_UP_KEY + commentId;
         //查询是否已经点赞

@@ -13,6 +13,7 @@ import com.wyq.project_springboot.entity.enumClass.CircleState;
 import com.wyq.project_springboot.mapper.CircleMapper;
 import com.wyq.project_springboot.mapper.UserMapper;
 import com.wyq.project_springboot.service.CircleAdminService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ import static com.wyq.project_springboot.entity.enumClass.CircleState.REJECTED;
 
 @Service
 @Transactional
+@Slf4j
 public class CircleAdminServiceImpl implements CircleAdminService {
     @Autowired
     private CircleMapper circleMapper;
@@ -105,12 +107,20 @@ public class CircleAdminServiceImpl implements CircleAdminService {
 
     @Override
     public Result rejectCircleApply(int circleId) {
+        Circle circle = circleMapper.selectCircle(circleId);
+        if(circle == null){
+            return Result.error("该圈子不存在");
+        }
         circleMapper.updateCircleState(circleId,REJECTED);
         return Result.success();
     }
 
     @Override
     public Result passCircleApply(int circleId) {
+        Circle circle = circleMapper.selectCircle(circleId);
+        if(circle == null){
+            return Result.error("该圈子不存在");
+        }
         circleMapper.updateCircleState(circleId,AUDITED);
         return Result.success();
     }

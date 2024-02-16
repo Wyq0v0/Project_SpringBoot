@@ -5,8 +5,16 @@
         insert into `t_goods`(`user_id`,`name`,`detail`,`category`,`sales_volume`) values(#{userId},#{name},#{detail},#{category},#{salesVolume})
     </insert>
 
+    <update id="updateGoodsDeleteState">
+        update `t_goods` set `is_delete` = #{deleteState.value} where `id` = #{goodsId}
+    </update>
+
+    <update id="updateGoodsState">
+        update `t_goods` set `state` = #{state.value} where `id` = #{goodsId}
+    </update>
+
     <select id="selectGoods" resultMap="goodsResultMap">
-        select * from `t_goods` where id = #{goodsId}
+        select * from `t_goods` where id = #{goodsId} and `state` = 1 and `is_delete` = 0
     </select>
 
     <select id="selectGoodsListByCriteria" resultMap="goodsResultMap">
@@ -21,11 +29,26 @@
             <if test="category != 0">
                 and `category` = #{category}
             </if>
+            <if test="state.value != null">
+                and `state` = #{state.value}
+            </if>
+            <if test="isDelete != null">
+                and `is_delete` = #{isDelete.value}
+            </if>
         </where>
+    </select>
+
+    <select id="selectUnauditedGoodsList" resultMap="goodsResultMap">
+        select * from `t_goods` where `state` = 0 and `is_delete` = 0
+    </select>
+
+    <select id="selectGoodsListByAccountName" resultMap="goodsResultMap">
+        select * from `t_goods` where `user_id` in(select `id` from `t_user` where `account_name` like concat("%",#{accountName},"%")) and `is_delete` = 0
     </select>
 
     <resultMap id="goodsResultMap" type="com.wyq.project_springboot.entity.Goods">
         <id property="id" column="id"></id>
         <result property="state" column="state" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"></result>
+        <result property="isDelete" column="is_delete" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"></result>
     </resultMap>
 </mapper>

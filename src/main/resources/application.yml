@@ -27,6 +27,11 @@ mybatis:
     # 开启驼峰命名
     map-underscore-to-camel-case: true
 
+# 日志
+logging:
+  file:
+    name: E:\\ProjectSpringBootLog\\project_spring_boot.log
+
 # 雪花算法配置
 server:
   workId: 2

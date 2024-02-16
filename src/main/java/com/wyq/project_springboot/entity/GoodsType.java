@@ -1,5 +1,6 @@
 package com.wyq.project_springboot.entity;
 
+import com.wyq.project_springboot.entity.enumClass.DeleteState;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,4 +17,5 @@ public class GoodsType {
     private BigDecimal price;
     private Image image;
     private int storage;
+    private DeleteState isDelete = DeleteState.UNDELETED;
 }

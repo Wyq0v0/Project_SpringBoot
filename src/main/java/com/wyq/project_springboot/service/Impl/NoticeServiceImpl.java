@@ -3,9 +3,11 @@ package com.wyq.project_springboot.service.Impl;
 import com.wyq.project_springboot.entity.Result;
 import com.wyq.project_springboot.service.NoticeService;
 import com.wyq.project_springboot.utils.ThreadLocalUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +16,8 @@ import static com.wyq.project_springboot.utils.RedisConstants.NOTICE_ALL_KEY;
 import static com.wyq.project_springboot.utils.RedisConstants.NOTICE_PERSON_KEY;
 
 @Service
+@Transactional
+@Slf4j
 public class NoticeServiceImpl implements NoticeService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;

@@ -14,6 +14,7 @@ import com.wyq.project_springboot.dto.goods.GoodsDTO;
 import com.wyq.project_springboot.dto.goods.GoodsTypeDTO;
 import com.wyq.project_springboot.dto.goods.GoodsOrderDTO;
 import com.wyq.project_springboot.entity.*;
+import com.wyq.project_springboot.entity.enumClass.DeleteState;
 import com.wyq.project_springboot.entity.enumClass.GoodsOrderState;
 import com.wyq.project_springboot.mapper.*;
 import com.wyq.project_springboot.service.ShopService;
@@ -21,6 +22,7 @@ import com.wyq.project_springboot.utils.SnowFlakeCompone;
 import com.wyq.project_springboot.utils.ThreadLocalUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -35,7 +37,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.wyq.project_springboot.entity.enumClass.DeleteState.DELETED;
 import static com.wyq.project_springboot.entity.enumClass.GoodsOrderState.PAID;
+import static com.wyq.project_springboot.entity.enumClass.GoodsState.AUDITED;
+import static com.wyq.project_springboot.entity.enumClass.GoodsState.UNAUDITED;
 import static com.wyq.project_springboot.utils.AddressConstants.ADDRESS_TOTAL_MAX;
 import static com.wyq.project_springboot.utils.AliPayConstant.*;
 import static com.wyq.project_springboot.utils.ImageUploadConstant.*;
@@ -43,6 +48,7 @@ import static com.wyq.project_springboot.utils.RedisConstants.ADDRESS_KEY;
 
 @Service
 @Transactional
+@Slf4j
 public class ShopServiceImpl implements ShopService {
     @Autowired
     private AliPayConfig aliPayConfig;
@@ -71,8 +77,10 @@ public class ShopServiceImpl implements ShopService {
     @Override
     public Result getGoods(int goodsId) {
         Goods goods = goodsMapper.selectGoods(goodsId);
-        if (goods == null) {
-            return Result.error("商品不存在");
+
+        //判断商品是否存在以及审核情况
+        if (goods == null || goods.getState().equals(UNAUDITED)) {
+            return Result.error("商品不存在或未上架");
         }
 
         //查询商品类型
@@ -156,6 +164,7 @@ public class ShopServiceImpl implements ShopService {
         //该对象作为搜索条件
         Goods selectGoods = new Goods();
         selectGoods.setCategory(selectCategory);
+        selectGoods.setState(AUDITED);
 
         PageHelper.startPage(pageNum, pageSize, sortBy + " " + sortOrder);
         Page<Goods> page = null;
@@ -335,16 +344,26 @@ public class ShopServiceImpl implements ShopService {
             goodsTypeImageMapper.insertImage(img);
         }
 
+        log.info("用户(ID:{})申请上架商品(ID:{})", userId, goods.getId());
         return Result.success();
     }
 
     @Override
     public Result getGoodsType(int goodsTypeId) {
-        GoodsTypeDTO goodsTypeDTO = new GoodsTypeDTO();
-
         GoodsType goodsType = goodsTypeMapper.selectGoodsType(goodsTypeId);
+        if(goodsType == null){
+            return Result.error("该商品类型不存在");
+        }
+
+        //获取该商品类型所属商品
         Goods goods = goodsMapper.selectGoods(goodsType.getGoodsId());
 
+        //判断该商品类型是否存在或所属商品是否过审
+        if(goods.getState().equals(UNAUDITED)){
+            return Result.error("该商品未过审");
+        }
+
+        GoodsTypeDTO goodsTypeDTO = new GoodsTypeDTO();
         goodsTypeDTO.setGoodsType(goodsType);
         goodsTypeDTO.setGoods(goods);
 
@@ -486,7 +505,7 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public Result getSalesGoodsOrderList(Integer goodsId,String selectItem, String content, String sortBy, String sortOrder, int pageNum, int pageSize) {
+    public Result getSalesGoodsOrderList(int goodsId,String selectItem, String content, String sortBy, String sortOrder, int pageNum, int pageSize) {
         //获取用户ID
         Map<String, Object> userMap = ThreadLocalUtil.get();
         Integer userId = (Integer) userMap.get("id");
@@ -527,6 +546,35 @@ public class ShopServiceImpl implements ShopService {
         listDTO.setListData(goodsOrderDTOList);
 
         return Result.success(listDTO);
+    }
+
+    @Override
+    public Result deleteGoodsType(int goodsTypeId) {
+        //获取用户ID
+        Map<String, Object> userMap = ThreadLocalUtil.get();
+        Integer userId = (Integer) userMap.get("id");
+
+        GoodsType goodsType = goodsTypeMapper.selectGoodsType(goodsTypeId);
+        if(goodsType == null){
+            return Result.error("该商品类型不存在");
+        }
+
+        Goods goods = goodsMapper.selectGoods(goodsType.getGoodsId());
+        if(!userId.equals(goods.getUserId())){
+            return Result.error("你无权删除该商品类型");
+        }
+
+        List<GoodsType> goodsTypes = goodsTypeMapper.selectGoodsTypeList(goods.getId());
+
+        if(goodsTypes.size() == 1){
+            return Result.error("删除失败，一件商品最少需要有一个商品类型");
+        }
+
+        //删除商品类型
+        goodsTypeMapper.updateGoodsTypeDeleteState(goodsTypeId, DELETED);
+
+        log.info("用户(ID:{})删除商品类型(ID:{})", userId, goodsTypeId);
+        return Result.success();
     }
 
     private GoodsOrderDTO goodsOrderToGoodsOrderDTO(GoodsOrder goodsOrder){
